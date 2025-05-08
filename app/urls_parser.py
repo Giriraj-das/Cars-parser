@@ -6,6 +6,8 @@ import logging
 from playwright.async_api import async_playwright
 
 from car_parser import ParseAutoRia
+from config import settings
+from utils import backup_postgres_db
 
 logger = logging.getLogger(__name__)
 
@@ -105,5 +107,12 @@ async def parser():
         finally:
             await context.close()
             await browser.close()
+
+            backup_postgres_db(
+                filename_prefix='autoria',
+                db_name=settings.postgres_db,
+                db_user=settings.postgres_user,
+                db_password=settings.postgres_password,
+            )
 
     logger.info(f"Scraping finished.")

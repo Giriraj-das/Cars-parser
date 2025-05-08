@@ -1,5 +1,8 @@
+import os
 import re
 import logging
+import subprocess
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -43,3 +46,36 @@ def normalize_phone_number(phone: str) -> str | None:
         return f'+380{digits}'
 
     return digits
+
+
+def backup_postgres_db(
+    filename_prefix: str,
+    db_name: str,
+    db_user: str,
+    db_password: str,
+) -> None:
+    """Creates a PostgreSQL database dump from a Docker container."""
+    os.makedirs('./dumps', exist_ok=True)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    dump_filename = f'{filename_prefix}_{timestamp}.sql'
+    output_path = os.path.join('./dumps', dump_filename)
+
+    dump_command = [
+        'pg_dump',
+        '-h', 'db',
+        '-U', db_user,
+        '-d', db_name
+    ]
+
+    env = os.environ.copy()
+    env['PGPASSWORD'] = db_password
+
+    with open(output_path, 'w') as f:
+        subprocess.run(
+            dump_command,
+            stdout=f,
+            env=env,
+            check=True,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
