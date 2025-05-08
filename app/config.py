@@ -28,5 +28,9 @@ class Settings(BaseSettings):
 
     db: DatabaseConfig
 
+    postgres_db: str
+    postgres_user: str
+    postgres_password: str
+
 
 settings = Settings()
